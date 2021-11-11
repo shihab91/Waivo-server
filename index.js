@@ -14,6 +14,7 @@ async function run() {
     const database = client.db('wivoDB');
     const productsCollection = database.collection('products');
     const reviewsCollection = database.collection('reviews');
+    const usersCollection = database.collection('users');
     console.log("db connected");
     // get all the products from the database
     app.get('/products', async (req, res) => {
@@ -26,6 +27,12 @@ async function run() {
       const reviews = await reviewsCollection.find({}).toArray();
       res.json(reviews);
     });
+    // save a user to database 
+    app.post('/users', async (req, res) => {
+      const user = req.body;
+      const result = await usersCollection.insertOne(user);
+      res.json(result);
+    })
   }
   finally {
     // client.close();
