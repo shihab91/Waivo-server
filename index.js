@@ -2,6 +2,7 @@ const express = require('express')
 const cors = require('cors');
 const { MongoClient } = require('mongodb');
 require('dotenv').config();
+var ObjectId = require('mongodb').ObjectId;
 const app = express();
 app.use(express.json())
 app.use(cors())
@@ -15,11 +16,18 @@ async function run() {
     const productsCollection = database.collection('products');
     const reviewsCollection = database.collection('reviews');
     const usersCollection = database.collection('users');
+    const ordersCollection = database.collection('orders');
     console.log("db connected");
     // get all the products from the database
     app.get('/products', async (req, res) => {
       const products = await productsCollection.find({}).toArray();
       res.json(products);
+    }
+    );
+    // get a single product from the database
+    app.get('/products/:id', async (req, res) => {
+      const product = await productsCollection.findOne({ _id: ObjectId(req.params.id) })
+      res.json(product);
     }
     );
     // get all the reviews from the database
@@ -33,6 +41,17 @@ async function run() {
       const result = await usersCollection.insertOne(user);
       res.json(result);
     })
+    // save orders to the database 
+    app.post("/orders", async (req, res) => {
+      const order = req.body;
+      const result = await ordersCollection.insertOne(order);
+      res.json(result);
+    })
+    // get all the orders from the database
+    app.get("/orders", async (req, res) => {
+      const orders = await ordersCollection.find({}).toArray();
+      res.json(orders);
+    });
   }
   finally {
     // client.close();
