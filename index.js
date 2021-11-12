@@ -35,7 +35,13 @@ async function run() {
       const reviews = await reviewsCollection.find({}).toArray();
       res.json(reviews);
     });
-    // save a user to database 
+    // post a review to the database
+    app.post("/reviews", async (req, res) => {
+      const review = req.body;
+      const newReview = await reviewsCollection.insertOne(review);
+      res.json(newReview);
+    })
+    // save a user to database
     app.post('/users', async (req, res) => {
       const user = req.body;
       const result = await usersCollection.insertOne(user);
@@ -57,9 +63,32 @@ async function run() {
       const orders = await ordersCollection.find({ userEmail: req.params.email }).toArray();
       res.json(orders);
     });
+    // delete an order from the database 
+    app.delete("/orders/:id", async (req, res) => {
+      const id = req.params.id;
+      const result = await ordersCollection.deleteOne({ _id: ObjectId(id) });
+      res.json(result);
+    })
+    // check an user if he an admin
+    app.get("/users/:email", async (req, res) => {
+      const user = await usersCollection.findOne({ email: req.params.email });
+      let isAdmin = false;
+      if (user?.role === "admin") {
+        isAdmin = true;
+      }
+      res.json({ admin: isAdmin });
+    })
+    // make an admin 
+    app.put("/users/admin", async (req, res) => {
+      const user = req.body;
+      const filter = { email: user.email };
+      const updateDoc = { $set: { role: "admin" } };
+      const result = await usersCollection.updateOne(filter, updateDoc);
+      res.json(result);
+    })
   }
   finally {
-    // client.close();
+    // await client.close();
   }
 }
 run().catch(console.dir);
