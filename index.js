@@ -88,7 +88,6 @@ async function run() {
     // update an order by id
     app.put("/orders", async (req, res) => {
       const id = req.query.id;
-      console.log(id);
       const query = { _id: ObjectId(id) };
       const result = await ordersCollection.updateOne(query, {
         $set: { status: "shipped" },
